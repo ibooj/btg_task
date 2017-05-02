@@ -66,7 +66,18 @@ class ContentSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = CustomViewRelatedField(model_field=Content()._meta.get_field('author'),
                                     view_fields=['id', 'get_full_name'], read_only=True)
+    likes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         exclude = ('content',)
+
+    def get_likes_count(self, obj):
+        return Like.like_counter.likes('content', obj.id)
+
+
+class LikeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Like
+        fields = ('content_type', 'object_id', 'like')

@@ -12,6 +12,7 @@ router.register(r'news', views.NewsView, base_name='news')
 
 urlpatterns = [
     url(r'^comments/(?P<content_id>\d+)/', views.CommentListView.as_view(), name='comment-list'),
+    url(r'^like_action/', views.MakeLikeView.as_view(), name='like-action'),
 ]
 
 urlpatterns += router.urls

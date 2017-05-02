@@ -54,12 +54,14 @@ class Comment(models.Model):
 
 class LikeManager(models.Manager):
     def likes(self, model, object_id):
-        qs = self.filter(content_type__app_label='poll', content_type__model=model, object_id=object_id).aggregate(
+        qs = self.values('content_type').filter(
+            content_type__app_label='poll', content_type__model=model, object_id=object_id).annotate(
             like=models.Count(models.Case(models.When(like=True, then=1))),
-            dislike=models.Count(models.Case(models.When(like=False, then=1)))
+            dislike=models.Count(models.Case(models.When(like=False, then=1))),
+            # total=models.Count('like')
         )
-        print qs
-        return qs
+        if qs:
+            return qs[0]
 
 
 class Like(models.Model):
@@ -73,8 +75,9 @@ class Like(models.Model):
     like = models.BooleanField(default=True)
 
     like_counter = LikeManager()
+    objects = models.Manager()
 
     class Meta:
         verbose_name = 'Like'
         verbose_name_plural = 'Likes'
-        unique_together = ('content_type', 'object_id', 'author', 'like')
+        unique_together = ('content_type', 'object_id', 'author')
