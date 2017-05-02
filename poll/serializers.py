@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from .models import Content, Comment
+from .models import Content, Comment, Like
 
 
 class CustomViewRelatedField(serializers.ModelField):
@@ -49,18 +49,24 @@ class CustomViewRelatedField(serializers.ModelField):
 class ContentSerializer(serializers.ModelSerializer):
     author = CustomViewRelatedField(model_field=Content()._meta.get_field('author'),
                                     view_fields=['id', 'get_full_name'], read_only=True)
-    messages = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Content
         fields = '__all__'
 
-    def get_messages(self, obj):
-        return [{
-            'date_create': o.date_create,
-            'message': o.message,
-            'author': {
-                'id': o.author.id,
-                'full_name': o.author.get_full_name(),
-            }
-        } for o in obj.comment_list.all().select_related('author')]
+    def get_comments_count(self, obj):
+        return obj.comment_list.count()
+
+    def get_likes_count(self, obj):
+        return Like.like_counter.likes('content', obj.id)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = CustomViewRelatedField(model_field=Content()._meta.get_field('author'),
+                                    view_fields=['id', 'get_full_name'], read_only=True)
+
+    class Meta:
+        model = Comment
+        exclude = ('content',)

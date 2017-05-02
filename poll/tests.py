@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import random
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth.models import User
@@ -54,3 +55,8 @@ class ContentViewTest(APITestCase):
         response = self.client.get(reverse('poll:news-detail', args=[self.content_item_list[0].id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK, msg=response.json())
         self.assertEqual(response.json()['content_type'], self.content_item_list[0].content_type)
+
+    def test_comment_list(self):
+        rc = random.randint(0, 99)
+        response = self.client.get(reverse('poll:comment-list', args=[self.content_item_list[rc].id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, msg=response.json())

@@ -22,3 +22,11 @@ class CommentAdmin(admin.ModelAdmin):
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):
     raw_id_fields = ('author',)
+    list_display = ('date_create', 'like', 'content_link', 'content_type', 'author', 'id')
+    search_fields = ('object_id',)
+
+    def content_link(self, obj):
+        if obj.content_object:
+            return '<a href="{}">{}</a>'.format(obj.content_object.get_admin_edit_url(), obj.content_object)
+
+    content_link.allow_tags = True
