@@ -58,7 +58,7 @@ class LikeManager(models.Manager):
             content_type__app_label='poll', content_type__model=model, object_id=object_id).annotate(
             like=models.Count(models.Case(models.When(like=True, then=1))),
             dislike=models.Count(models.Case(models.When(like=False, then=1))),
-            # total=models.Count('like')
+            total=models.Count('like')
         )
         if qs:
             return qs[0]
